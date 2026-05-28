@@ -1,0 +1,6 @@
+name: 'AI Code Guard'
+description: 'Scan PRs for AI-specific vulnerabilities. Detects hallucinated packages, prompt injection, hardcoded secrets, insecure AI config, and hallucinated API usage.'
+author: 'tcflying'
+branding:
+  icon: 'shield'
+  color: 'blue'

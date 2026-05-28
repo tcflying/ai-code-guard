@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run scanner on test fixtures
+        run: |
+          node scanner/index.js \
+            --files "tests/fixtures/vulnerable.js,tests/fixtures/clean.py" \
+            --workdir . \
+            --report /tmp/ci-report.json \
+            --fail-severity none
+
+      - name: Verify results
+        run: |
+          python3 -c "
+          import json
+          r = json.load(open('/tmp/ci-report.json'))
+          assert r['summary']['scanned'] == 2, f'Expected 2 scanned, got {r[\"summary\"][\"scanned\"]}'
+          assert r['summary']['vulnerabilities'] > 0, 'Expected vulnerabilities in vulnerable fixture'
+          assert r['summary']['failures'] == 0, 'fail-severity=none so failures should be 0'
+          print(f'PASS: {r[\"summary\"][\"vulnerabilities\"]} findings across {r[\"summary\"][\"scanned\"]} files')
+          for rule, count in r['summary']['by_rule'].items():
+            print(f'  {rule}: {count}')
+          "
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t ai-code-guard .
