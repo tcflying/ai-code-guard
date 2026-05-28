@@ -1,0 +1,51 @@
+name: 'AI Code Guard'
+description: 'Scan PRs for AI-specific vulnerabilities — hallucinated packages, prompt injection, hardcoded secrets, insecure AI config, and hallucinated API usage.'
+author: 'tcflying'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token for posting PR comments. Uses GITHUB_TOKEN by default.'
+    required: false
+    default: ${{ github.token }}
+  fail-on-severity:
+    description: 'Minimum severity to fail the check. One of: critical, high, medium, low, none'
+    required: false
+    default: 'high'
+  mode:
+    description: 'Scan mode. "pr" (scan PR diff only, default) or "full" (scan entire repo)'
+    required: false
+    default: 'pr'
+  config-path:
+    description: 'Path to custom ai-code-guard config file (relative to repo root)'
+    required: false
+    default: ''
+  semgrep-rules:
+    description: 'Additional semgrep rule paths to include (comma-separated, relative to repo root)'
+    required: false
+    default: ''
+  exclude-patterns:
+    description: 'File patterns to exclude from scanning (comma-separated globs)'
+    required: false
+    default: '*.min.js,*.bundle.js,*.pb.go,vendor/*,node_modules/*'
+
+outputs:
+  vulnerabilities-found:
+    description: 'Number of vulnerabilities detected'
+    value: ${{ steps.scan.outputs.count }}
+  report-json:
+    description: 'Path to the JSON report file'
+    value: ${{ steps.scan.outputs.report }}
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.github-token }}
+    - ${{ inputs.fail-on-severity }}
+    - ${{ inputs.mode }}
+    - ${{ inputs.config-path }}
+    - ${{ inputs.semgrep-rules }}
+    - ${{ inputs.exclude-patterns }}

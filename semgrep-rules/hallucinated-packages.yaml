@@ -1,0 +1,23 @@
+rules:
+  - id: ai-hallucinated-package-import
+    pattern-either:
+      - pattern: |
+          require($PKG)
+      - pattern: |
+          import $PKG
+    pattern-inside: |
+      ...
+    message: >
+      Potentially hallucinated package "$PKG". AI-generated code frequently invents
+      package names that look realistic but don't exist on the registry.
+    severity: WARNING
+    languages:
+      - javascript
+      - typescript
+      - python
+    metadata:
+      category: security
+      technology:
+        - ai-code-guard
+      cwe: "CWE-1104: Use of Unmaintained Third-Party Components"
+      confidence: LOW

@@ -1,0 +1,36 @@
+rules:
+  - id: ai-prompt-injection-user-input
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $PROMPT = "...$USERINPUT..."
+          - pattern-inside: |
+              $PROMPT = '...$USERINPUT...'
+          - pattern-inside: |
+              `...$USERINPUT...`
+      - pattern-either:
+          - pattern: |
+              $LLM.call(...)
+          - pattern: |
+              $LLM.generate(...)
+          - pattern: |
+              $LLM.complete(...)
+          - pattern: |
+              $LLM.chat(...)
+          - pattern-regex: (?:openai|anthropic|bedrock|vertex).*
+    message: >
+      User input is interpolated directly into an LLM prompt without visible
+      sanitization. This is a prompt injection vulnerability — an attacker
+      could override system instructions or extract sensitive context.
+    severity: ERROR
+    languages:
+      - javascript
+      - typescript
+      - python
+      - go
+    metadata:
+      category: security
+      technology:
+        - ai-code-guard
+      cwe: "CWE-94: Improper Control of Generation of Code"
+      confidence: MEDIUM

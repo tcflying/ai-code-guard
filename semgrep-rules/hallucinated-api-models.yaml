@@ -1,0 +1,23 @@
+rules:
+  - id: ai-hallucinated-api-model
+    patterns:
+      - pattern-regex: (?:gpt-\d+-ultra|gpt-5|claude-4|claude-opus-\d+|gemini-ultra)
+    message: >
+      AI-generated code often references model names that don't exist yet
+      (e.g., "gpt-5", "claude-4"). Verify this model name against current
+      provider documentation before using.
+    severity: WARNING
+    languages:
+      - javascript
+      - typescript
+      - python
+      - go
+      - java
+      - yaml
+      - json
+    metadata:
+      category: security
+      technology:
+        - ai-code-guard
+      cwe: "CWE-1104: Use of Unmaintained Third-Party Components"
+      confidence: LOW
